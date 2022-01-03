@@ -5,6 +5,8 @@ pub fn divmod(dividend: i16, divisor: i16) -> (i16, i16) {
 }
 
 pub fn evens<T>(iter: impl Iterator<Item = T>) -> impl Iterator<Item = T> {
+    // best idea: iter.step_by(2)
+    // more verbose:
     iter.enumerate()
         .filter(|(i, _)| i % 2 == 0)
         .map(|(_, val)| val)
