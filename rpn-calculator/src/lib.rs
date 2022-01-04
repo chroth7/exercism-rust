@@ -10,33 +10,38 @@ pub enum CalculatorInput {
 }
 
 fn operate(
-    x: Option<CalculatorInput>,
-    y: Option<CalculatorInput>,
+    input_pair: Option<(Option<CalculatorInput>, Option<CalculatorInput>)>,
     operation: fn(&i32, &i32) -> i32,
 ) -> Option<CalculatorInput> {
-    if let (Some(Value(x_val)), Some(Value(y_val))) = (x, y) {
-        Some(Value(operation(&x_val, &y_val)))
-    } else {
-        None
+    match input_pair {
+        Some((x, y)) => {
+            if let (Some(Value(x_val)), Some(Value(y_val))) = (x, y) {
+                Some(Value(operation(&x_val, &y_val)))
+            } else {
+                None
+            }
+        }
+        None => None,
     }
 }
 
 pub fn evaluate(inputs: &[CalculatorInput]) -> Option<i32> {
     let result = inputs.iter().fold(vec![], |mut stack, input| {
+        // handle the Value
+        if let Value(n) = input {
+            stack.push(Some(Value(*n)));
+            return stack;
+        }
+        let pair = stack
+            .pop()
+            .and_then(|a| stack.pop().and_then(|b| Some((a, b))));
+
         let new_val = match input {
-            Value(n) => Some(Value(*n)),
-            Add => stack
-                .pop()
-                .and_then(|a| stack.pop().and_then(|b| operate(a, b, |x, y| x + y))),
-            Subtract => stack
-                .pop()
-                .and_then(|a| stack.pop().and_then(|b| operate(a, b, |x, y| y - x))),
-            Multiply => stack
-                .pop()
-                .and_then(|a| stack.pop().and_then(|b| operate(a, b, |x, y| x * y))),
-            Divide => stack
-                .pop()
-                .and_then(|a| stack.pop().and_then(|b| operate(a, b, |x, y| y / x))),
+            Add => operate(pair, |x, y| x + y),
+            Subtract => operate(pair, |x, y| y - x),
+            Multiply => operate(pair, |x, y| x * y),
+            Divide => operate(pair, |x, y| y / x),
+            _ => None,
         };
         stack.push(new_val);
         stack
