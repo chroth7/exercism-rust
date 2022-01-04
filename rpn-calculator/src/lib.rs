@@ -1,3 +1,5 @@
+use crate::CalculatorInput::{Add, Divide, Multiply, Subtract, Value};
+
 #[derive(Debug)]
 pub enum CalculatorInput {
     Add,
@@ -8,13 +10,13 @@ pub enum CalculatorInput {
 }
 
 fn operate(
-    x: CalculatorInput,
-    y: CalculatorInput,
+    x: Option<CalculatorInput>,
+    y: Option<CalculatorInput>,
     operation: fn(&i32, &i32) -> i32,
 ) -> Option<CalculatorInput> {
     match x {
-        CalculatorInput::Value(xx) => match y {
-            CalculatorInput::Value(yy) => Some(CalculatorInput::Value(operation(&xx, &yy))),
+        Some(Value(xx)) => match y {
+            Some(Value(yy)) => Some(Value(operation(&xx, &yy))),
             _ => None,
         },
         _ => None,
@@ -22,46 +24,31 @@ fn operate(
 }
 
 pub fn evaluate(inputs: &[CalculatorInput]) -> Option<i32> {
-    let mut result = Vec::new();
-    for input in inputs {
+    let result = inputs.iter().fold(vec![], |mut stack, input| {
         let new_val = match input {
-            CalculatorInput::Value(n) => Some(CalculatorInput::Value(*n)),
-            CalculatorInput::Add => {
-                if result.len() < 2 {
-                    return None;
-                }
-                operate(result.pop().unwrap(), result.pop().unwrap(), |x, y| x + y)
-            }
-            CalculatorInput::Subtract => {
-                if result.len() < 2 {
-                    return None;
-                }
-                operate(result.pop().unwrap(), result.pop().unwrap(), |x, y| y - x)
-            }
-            CalculatorInput::Multiply => {
-                if result.len() < 2 {
-                    return None;
-                }
-                operate(result.pop().unwrap(), result.pop().unwrap(), |x, y| x * y)
-            }
-            CalculatorInput::Divide => {
-                if result.len() < 2 {
-                    return None;
-                }
-                operate(result.pop().unwrap(), result.pop().unwrap(), |x, y| y / x)
-            }
+            Value(n) => Some(Value(*n)),
+            Add => stack
+                .pop()
+                .and_then(|a| stack.pop().and_then(|b| operate(a, b, |x, y| x + y))),
+            Subtract => stack
+                .pop()
+                .and_then(|a| stack.pop().and_then(|b| operate(a, b, |x, y| y - x))),
+            Multiply => stack
+                .pop()
+                .and_then(|a| stack.pop().and_then(|b| operate(a, b, |x, y| x * y))),
+            Divide => stack
+                .pop()
+                .and_then(|a| stack.pop().and_then(|b| operate(a, b, |x, y| y / x))),
         };
-        match new_val {
-            Some(val) => result.push(val),
-            None => return None,
-        }
-    }
+        stack.push(new_val);
+        stack
+    });
 
     if result.len() != 1 {
         return None;
     }
     match result.first().unwrap() {
-        CalculatorInput::Value(n) => Some(*n),
+        Some(Value(n)) => Some(*n),
         _ => None,
     }
 }
