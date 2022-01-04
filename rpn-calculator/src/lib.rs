@@ -1,3 +1,6 @@
+// very nice solution using `try_fold`:
+// https://exercism.org/tracks/rust/exercises/rpn-calculator/solutions/insideoutclub
+
 use crate::CalculatorInput::{Add, Divide, Multiply, Subtract, Value};
 
 #[derive(Debug)]
