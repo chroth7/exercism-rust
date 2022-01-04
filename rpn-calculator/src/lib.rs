@@ -1,5 +1,6 @@
 // very nice solution using `try_fold`:
 // https://exercism.org/tracks/rust/exercises/rpn-calculator/solutions/insideoutclub
+// this is more or less a copy of it
 
 use crate::CalculatorInput::{Add, Divide, Multiply, Subtract, Value};
 
@@ -12,46 +13,31 @@ pub enum CalculatorInput {
     Value(i32),
 }
 
-fn operate(
-    input_pair: Option<(Option<CalculatorInput>, Option<CalculatorInput>)>,
-    operation: fn(&i32, &i32) -> i32,
-) -> Option<CalculatorInput> {
-    input_pair.and_then(|(x, y)| {
-        if let (Some(Value(x_val)), Some(Value(y_val))) = (x, y) {
-            Some(Value(operation(&x_val, &y_val)))
-        } else {
-            None
-        }
-    })
+fn operate(stack: &mut Vec<i32>, operation: fn(&i32, &i32) -> i32) -> Option<i32> {
+    stack
+        .pop()
+        .and_then(|y| stack.pop().map(|x| operation(&x, &y)))
 }
 
 pub fn evaluate(inputs: &[CalculatorInput]) -> Option<i32> {
-    let result = inputs.iter().fold(vec![], |mut stack, input| {
-        // handle the Value
-        if let Value(n) = input {
-            stack.push(Some(Value(*n)));
-            return stack;
-        }
-        let pair = stack
-            .pop()
-            .and_then(|a| stack.pop().and_then(|b| Some((a, b))));
-
-        let new_val = match input {
-            Add => operate(pair, |x, y| x + y),
-            Subtract => operate(pair, |x, y| y - x),
-            Multiply => operate(pair, |x, y| x * y),
-            Divide => operate(pair, |x, y| y / x),
+    inputs
+        .iter()
+        .try_fold(vec![], |mut stack, input| {
+            match *input {
+                Add => operate(&mut stack, |x, y| x + y),
+                Subtract => operate(&mut stack, |x, y| x - y),
+                Multiply => operate(&mut stack, |x, y| x * y),
+                Divide => operate(&mut stack, |x, y| x / y),
+                Value(x) => Some(x),
+            }
+            // note: this maps within the Option functor
+            .map(|x| {
+                stack.push(x);
+                stack
+            })
+        })
+        .and_then(|stack| match stack.as_slice() {
+            [x] => Some(*x),
             _ => None,
-        };
-        stack.push(new_val);
-        stack
-    });
-
-    if result.len() != 1 {
-        return None;
-    }
-    match result.first().unwrap() {
-        Some(Value(n)) => Some(*n),
-        _ => None,
-    }
+        })
 }
