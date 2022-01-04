@@ -13,11 +13,18 @@ where
     })
 }
 
+fn check_subset<T>(inner: HashMap<T, usize>, outer: HashMap<T, usize>) -> bool
+where
+    T: Eq + Hash,
+{
+    inner
+        .iter()
+        .all(|(key, count)| outer.get(key).unwrap_or(&0) >= count)
+}
+
 pub fn can_construct_note(magazine: &[&str], note: &[&str]) -> bool {
     let magazine_words = create_hashmap(magazine);
     let note_words = create_hashmap(note);
 
-    note_words
-        .iter()
-        .all(|(word, count)| magazine_words.get(word).unwrap_or(&0) >= count)
+    check_subset(note_words, magazine_words)
 }
