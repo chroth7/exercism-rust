@@ -14,12 +14,10 @@ fn operate(
     y: Option<CalculatorInput>,
     operation: fn(&i32, &i32) -> i32,
 ) -> Option<CalculatorInput> {
-    match x {
-        Some(Value(xx)) => match y {
-            Some(Value(yy)) => Some(Value(operation(&xx, &yy))),
-            _ => None,
-        },
-        _ => None,
+    if let (Some(Value(x_val)), Some(Value(y_val))) = (x, y) {
+        Some(Value(operation(&x_val, &y_val)))
+    } else {
+        None
     }
 }
 
