@@ -3,12 +3,12 @@ use std::hash::Hash;
 
 // inspired by https://exercism.org/tracks/rust/exercises/magazine-cutout/solutions/surfingtomchen
 
-fn create_hashmap<'a, T>(vec: &'a [&T]) -> HashMap<&'a &'a T, i32>
+fn create_hashmap<T>(vec: &[T]) -> HashMap<T, usize>
 where
-    T: Eq + Hash + ?Sized,
+    T: Eq + Hash + Copy,
 {
     vec.iter().fold(HashMap::new(), |mut acc, key| {
-        *acc.entry(key).or_insert(0) += 1;
+        *acc.entry(*key).or_insert(0) += 1;
         acc
     })
 }
