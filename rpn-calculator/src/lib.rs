@@ -13,16 +13,13 @@ fn operate(
     input_pair: Option<(Option<CalculatorInput>, Option<CalculatorInput>)>,
     operation: fn(&i32, &i32) -> i32,
 ) -> Option<CalculatorInput> {
-    match input_pair {
-        Some((x, y)) => {
-            if let (Some(Value(x_val)), Some(Value(y_val))) = (x, y) {
-                Some(Value(operation(&x_val, &y_val)))
-            } else {
-                None
-            }
+    input_pair.and_then(|(x, y)| {
+        if let (Some(Value(x_val)), Some(Value(y_val))) = (x, y) {
+            Some(Value(operation(&x_val, &y_val)))
+        } else {
+            None
         }
-        None => None,
-    }
+    })
 }
 
 pub fn evaluate(inputs: &[CalculatorInput]) -> Option<i32> {
