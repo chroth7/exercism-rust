@@ -5,10 +5,10 @@ use std::hash::Hash;
 
 fn create_hashmap<T>(vec: &[T]) -> HashMap<T, usize>
 where
-    T: Eq + Hash + Copy,
+    T: Eq + Hash + ToOwned<Owned = T>,
 {
     vec.iter().fold(HashMap::new(), |mut acc, key| {
-        *acc.entry(*key).or_insert(0) += 1;
+        *acc.entry(key.to_owned()).or_insert(0) += 1;
         acc
     })
 }
@@ -27,4 +27,30 @@ pub fn can_construct_note(magazine: &[&str], note: &[&str]) -> bool {
     let note_words = create_hashmap(note);
 
     check_subset(note_words, magazine_words)
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::create_hashmap;
+
+    #[test]
+    fn string_slices() {
+        let slices = ["foo", "bar", "foo"];
+        let hashmap = create_hashmap(&slices);
+
+        assert_eq!(hashmap.get("foo"), Some(&2usize));
+    }
+
+    #[test]
+    fn strings() {
+        let strings = [
+            String::from("foo"),
+            String::from("bar"),
+            String::from("foo"),
+            String::from("foo"),
+        ];
+        let hashmap = create_hashmap(&strings);
+
+        assert_eq!(hashmap.get("foo"), Some(&3usize));
+    }
 }
