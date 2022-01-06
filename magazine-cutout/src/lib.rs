@@ -3,9 +3,16 @@ use std::hash::Hash;
 
 // inspired by https://exercism.org/tracks/rust/exercises/magazine-cutout/solutions/surfingtomchen
 
-fn create_hashmap<T>(vec: &[T]) -> HashMap<T, usize>
+type Counter<T> = HashMap<T, usize>;
+
+// for reference, this is the short signature without the `Item` generic type.
+// But I kinda find the long form more readable, for now...
+// fn create_hashmap<T>(vec: &[impl ToOwned<Owned = T>]) -> Counter<T>
+
+fn count<Key, Item>(vec: &[Item]) -> Counter<Key>
 where
-    T: Eq + Hash + ToOwned<Owned = T>,
+    Key: Eq + Hash,
+    Item: ToOwned<Owned = Key>,
 {
     vec.iter().fold(HashMap::new(), |mut acc, key| {
         *acc.entry(key.to_owned()).or_insert(0) += 1;
@@ -13,9 +20,9 @@ where
     })
 }
 
-fn check_subset<T>(inner: HashMap<T, usize>, outer: HashMap<T, usize>) -> bool
+fn check_subset<Key>(inner: Counter<Key>, outer: Counter<Key>) -> bool
 where
-    T: Eq + Hash,
+    Key: Eq + Hash,
 {
     inner
         .iter()
@@ -23,20 +30,20 @@ where
 }
 
 pub fn can_construct_note(magazine: &[&str], note: &[&str]) -> bool {
-    let magazine_words = create_hashmap(magazine);
-    let note_words = create_hashmap(note);
+    let magazine_words = count(magazine);
+    let note_words = count(note);
 
     check_subset(note_words, magazine_words)
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::create_hashmap;
+    use crate::count;
 
     #[test]
     fn string_slices() {
         let slices = ["foo", "bar", "foo"];
-        let hashmap = create_hashmap(&slices);
+        let hashmap = count(&slices);
 
         assert_eq!(hashmap.get("foo"), Some(&2usize));
     }
@@ -49,7 +56,7 @@ mod tests {
             String::from("foo"),
             String::from("foo"),
         ];
-        let hashmap = create_hashmap(&strings);
+        let hashmap = count(&strings);
 
         assert_eq!(hashmap.get("foo"), Some(&3usize));
     }
