@@ -1,5 +1,3 @@
-use std::ops::Div;
-
 fn divides(n: u64, d: u64) -> bool {
     n % d == 0
 }
