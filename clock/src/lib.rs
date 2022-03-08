@@ -1,3 +1,5 @@
+// make sure to check out https://exercism.org/tracks/rust/exercises/clock/solutions/ukolka
+// it just stores minutes, which is great. Just great.
 use std::fmt::Display;
 
 #[derive(Debug)]
