@@ -20,6 +20,7 @@ impl PartialEq for Clock {
 
 impl Clock {
     pub fn new(hours: i32, minutes: i32) -> Self {
+        // a bit too lazy to research things like `rem_euclid` etc.
         let hours_from_minutes = minutes / 60;
         let mut hours = (hours + hours_from_minutes) % 24;
 
@@ -33,10 +34,7 @@ impl Clock {
             hours += 24
         }
 
-        Clock {
-            hours,
-            minutes: minutes % 60,
-        }
+        Clock { hours, minutes }
     }
 
     pub fn add_minutes(&self, minutes: i32) -> Self {
