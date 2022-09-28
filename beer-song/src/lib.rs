@@ -16,9 +16,14 @@ pub fn verse(n: u32) -> String {
 }
 
 pub fn sing(start: u32, end: u32) -> String {
-    let mut song = vec![];
-    for i in (end..=start).rev() {
-        song.push(verse(i));
-    }
-    song.join("\n")
+    // let mut song = vec![];
+    // for i in (end..=start).rev() {
+    //     song.push(verse(i));
+    // }
+    // song.join("\n")
+    (end..=start)
+        .rev()
+        .map(verse)
+        .collect::<Vec<_>>()
+        .join("\n")
 }
