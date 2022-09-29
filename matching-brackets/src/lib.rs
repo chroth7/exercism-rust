@@ -1,3 +1,5 @@
+// this shows how it should be done... https://exercism.org/tracks/rust/exercises/matching-brackets/solutions/michaelmez39
+
 fn super_find(opener: char, closer: char, subset: &str) -> Option<usize> {
     let mut inner_count = 0;
     let mut index = 0;
